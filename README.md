@@ -8,6 +8,7 @@ Visual Studio
 ### Programming Language :  
 C++   
   
+### Personal info :  
 St. Calancea Daniel  
 Gr. FAF-151  
 Mail daniel.calancea@faf.utm.md
