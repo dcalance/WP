@@ -1,66 +1,23 @@
-# Windows Programming Laboratory Work #1
-[Initial version](https://github.com/TUM-FAF/WP/tree/master/lab%231).
 
-## Title
-Window. Window handling. Basic window’s form elements
-
-## Contents
-* Win32 API
-* GIT
-* Window
-* Button
-* Text Input
-* Text
-
-## Prerequisites
-
-### IDE and compiler
-You can use whatever IDE/Text editor/CLI you want, but you'll have to write code by your own.
-I recommend [CodeBlocks](http://www.codeblocks.org/) as it is cross platform, has a version which contains a compiler, and is less tempting to try drag-n-drop features.
-
-#### If you chose CodeBlocks, here is how you start a project with it:
-* Download. Better choose a version which has compiler. Also it is a good idea to take last stable version (12.11), but it is not mandatory as 8.X is also good one.
-* Install. After installation it will ask you to choose a default compiler. Do it wisely.
-* File -> New -> Project -> Win32 GUI project -> Next...
-* In order to see only GUI window without console, in Project properties, set Build targets -> Type -> GUI Application (project may need a rebuild)
-
-#### Using VCS (GIT or SVN) and GitHub
-You should be familiar with GIT, if not then take a look at [IDE Lab nr.1](https://github.com/TUM-FAF/IDE/blob/master/MIDPS_LAB_1.md).
-
-Main purposes of GIT/GitHub are:
-* Proof of your work
-* Analyzing your progress and understanding of course
-* Safe place to keep your work
-* Delimiting development and ready work
-
-By default you have one branch - master. I'll review only work from that branch.
-
-Initially master branch should have two files: .gitignore and README.md.
-* I recommend to copy .gitignore file from [WP Labs master branch](https://github.com/TUM-FAF/WP). Add additional rules in order not to submit unnecessary files to repository.
-* README.md (can be any other flavoured by GitHub extension) should contain at least the name of course and your name.
-
-Later you'll have one folder per laboratory work. Use **lab#X** format (where X is laboratory work number). More about this you can find on [Submission Process page](https://github.com/TUM-FAF/WP/wiki/Submission-Process).
-
-Before submission you can use other branches to work on your projects. You can use other branches in order to require help from me or other classmates.
-
-### Laboratory work Requirements:
-  - for _Basic Level_ (grade 5 || 6) you should be able to:
-    * Create a Windows application
-    * In the middle of the window should be present the following text: "Done with Pride and Prejudice by student name". Replace student name with your name.
-    * On windows resize, text should reflow and be in window's middle (vertically and horizontally)
-  - for _Normal Level_ (grade 7 || 8) you should be able to:
-    * Realize the tasks from _Basic Level_.
-    * Add 2 buttons to window: one with default styles, one with custom styles (size, background, text color, font family/size)
-    * Add 2 text elements to window: one with default styles, one with custom styles (size, background, text color, font family/size)
-  - for _Advanced Level_ (grade 9 || 10) you should be able to:
-    * Realize the tasks from _Normal Level_.
-    * Make elements to interact or change other elements (2 different interactions)  _(ex. on button click, change text element color or position)_
-    * Change behavior of different window actions (at least 3). For ex.: on clicking close button, move window to a random location on display working space 
-
-## References
-* Programming Windows by Charlez Petzold, 5th edition:
-  * Section I, Chapter 1
-  * Section I, Chapter 2
-  * Section I, Chapter 3
-  * Section I, Chapter 4
-  * Section I, Chapter 9
+### Laboratory work #1:  
+    * Create a Windows application  
+	Windows application is intialized with functions WinMain and WinProc:  
+	WinMain initializes the window and loops the messages as long as the program is running.  
+	WinProc handles all the messages passed by interactions of user with window.  
+    * In the middle of the window should be present the following text: "Done with Pride and Prejudice by student name". Replace student name with your name.  
+	Text was created using DrawText function. We draw the text by handling WM_PAINT that window passes message when window is created.  
+    * On windows resize, text should reflow and be in window's middle (vertically and horizontally)  
+	The text is always centered because when we create or resize the window we pass the messages WM_PAINT that paints the text centered in the client zone, when we resize the window the client becomes bigger/smaller and it calculates new coordinates.  
+    * Add 2 buttons to window: one with default styles, one with custom styles (size, background, text color, font family/size)  
+	We add buttons in WM_CREATE handle since it is accessed by program when we create the window. We create a standard button with style BS_DEFPUSHBUTTON that is one of the standard styles, and the second with BS_OWNERDRAW witch is a custom button.  
+	The custom button is drawn in WM_DRAWITEM handle, where we change it's color to green and black and we also add 2 states that change (button pressed/ button not pressed).  
+    * Add 2 text elements to window: one with default styles, one with custom styles (size, background, text color, font family/size)  
+	Added 2 edit controls. First one is standard with default value a string from a variable, the second one is initialized the same hovewer after that we add a custom font and we edit its appearance in WM_CTLCOLOREDIT where we handle it by its id.  
+    * Make elements to interact or change other elements (2 different interactions)  _(ex. on button click, change text element color or position)_  
+	We create handle for our buttons that we created earlier. The button with name "Change window name" is handled in WM_COMMAND and by his id we program it to change the window name.  
+	The second button with name "Change Message" is also handle in WM_COMMAND by its id, and it's function is to change a variable that is printed in our previous exercise in the center of the screen.  
+    * Change behavior of different window actions (at least 3). For ex.: on clicking close button, move window to a random location on display working space  
+	We changed the behavior of all 3 buttons on top of the window.  
+	Minimize button now has custom handle in WM_SYSCOMMAND, and instead of standard minimizing now it moves and resizes the window to a random location/size from 0 to 500.  
+	Maximize button is also handled in WM_SYSCOMMAND and now when we press it it promps a messageBox that asks us if we want to close the program, by pressing ok the program will close and window will be destroyed.  
+	Close button now insead of closing the window generates asynchonous sound of "Device connected" from windows. To make this possible we also linked the library winmm.lib to our project. 
