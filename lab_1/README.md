@@ -1,6 +1,6 @@
 
 ### Laboratory work #1: 
- * Create a Windows application  
+ * **Create a Windows application**   
 	Windows application is intialized with functions WinMain and WinProc.
 	WinMain initializes the window and loops the messages as long as the program is running. 
 	WinProc handles all the messages passed by interactions of user with window.
