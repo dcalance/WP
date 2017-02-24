@@ -1,5 +1,5 @@
 
-### Laboratory work #1:  
+### Laboratory work #1:
     * Create a Windows application  
 	Windows application is intialized with functions WinMain and WinProc:  
 	WinMain initializes the window and loops the messages as long as the program is running.  
