@@ -15,6 +15,10 @@ bool currentBackground = true;
 #define ID_HOTKEY_PAUSE 100
 #define ID_HOTKEY_CHANGEBG 101
 
+#define ID_SCROLLBAR 400
+
+WNDCLASSW wc;
+
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	PWSTR lpCmdLine, int nCmdShow) {
@@ -28,9 +32,35 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	wc.hCursor = LoadCursor(0, IDC_ARROW);
 
 	RegisterClassW(&wc);
-	CreateWindowW(wc.lpszClassName, L"Simple menu",
+	HWND hwnd = CreateWindowW(
+		wc.lpszClassName, 
+		L"Window",
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-		100, 100, 350, 250, 0, 0, hInstance, 0);
+		100, 
+		100, 
+		640, 
+		480, 
+		0, 
+		0, 
+		wc.hInstance, 
+		0);
+	
+	CreateWindowEx(
+		0,                      // no extended styles 
+		"SCROLLBAR",           // scroll bar control class 
+		(PTSTR)NULL,           // no window text 
+		WS_CHILD | WS_VISIBLE   // window styles  
+		| SBS_HORZ,         // horizontal scroll bar style 
+		0,              // horizontal position 
+		10,				// vertical position 
+		500,             // width of the scroll bar 
+		20,               // height of the scroll bar
+		hwnd,             // handle to main window 
+		(HMENU)ID_SCROLLBAR,           // no menu 
+		hInstance,      // instance owning this window 
+		(PVOID)NULL            // pointer not needed 
+	);
+	
 
 	while (GetMessage(&msg, NULL, 0, 0)) {
 
@@ -41,8 +71,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	return (int)msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,
-	WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 	LPCSTR a ,b;
 	HBITMAP hBitmap01;
@@ -94,6 +123,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,
 		case ID_HOTKEY_CHANGEBG:
 			currentBackground = !currentBackground;
 			InvalidateRect(hwnd, NULL, 1);
+			break;
 		}
 
 	case WM_CREATE:
@@ -101,8 +131,40 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,
 		AddMenus(hwnd);
 		RegisterHotKey(hwnd, ID_HOTKEY_PAUSE, MOD_CONTROL, 'D');
 		RegisterHotKey(hwnd, ID_HOTKEY_CHANGEBG, MOD_SHIFT, ' ');
-		break;
 
+
+
+		break;
+	case WM_HSCROLL:
+		switch (LOWORD(wParam))
+		{
+			// User clicked the scroll bar shaft left of the scroll box. 
+		case SB_PAGEUP:
+			
+			break;
+
+			// User clicked the scroll bar shaft right of the scroll box. 
+		case SB_PAGEDOWN:
+			
+			break;
+
+			// User clicked the left arrow. 
+		case SB_LINEUP:
+			
+			break;
+
+			// User clicked the right arrow. 
+		case SB_LINEDOWN:
+			
+			break;
+
+			// User dragged the scroll box. 
+		case SB_THUMBPOSITION:
+			
+			break;
+
+		}
+		break;
 	case WM_COMMAND:
 
 		switch (LOWORD(wParam)) {
