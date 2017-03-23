@@ -3,8 +3,7 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void AddMenus(HWND);
 
-#define IDM_FILE_NEW 1
-#define IDM_FILE_OPEN 2
+#define IDM_FILE_DNTPRESS 1
 #define IDM_FILE_QUIT 3
 #define IDM_FILE_ABOUT 4
 
@@ -36,6 +35,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,
 	WPARAM wParam, LPARAM lParam) {
 
+	LPCSTR a ,b;
+
 	switch (msg) {
 
 	case WM_CREATE:
@@ -55,10 +56,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,
 				MB_ICONWARNING | MB_OK
 			);
 			break;
-		case IDM_FILE_NEW:
-		case IDM_FILE_OPEN:
-
-			MessageBeep(MB_ICONINFORMATION);
+		case IDM_FILE_DNTPRESS:
+			a = "open DingDongSong.mp3 type mpegvideo alias song1";
+			mciSendString(a, NULL, 0, 0);
+			b = "play song1";
+			mciSendString(b, NULL, 0, 0);
 			break;
 
 		case IDM_FILE_QUIT:
@@ -88,8 +90,7 @@ void AddMenus(HWND hwnd) {
 	hMenu = CreateMenu();
 	hMenu2 = CreateMenu();
 
-	AppendMenuW(hMenu, MF_STRING, IDM_FILE_NEW, L"&New");
-	AppendMenuW(hMenu, MF_STRING, IDM_FILE_OPEN, L"&Open");
+	AppendMenuW(hMenu, MF_STRING, IDM_FILE_DNTPRESS, L"&Don't press it");
 	AppendMenuW(hMenu, MF_SEPARATOR, 0, NULL);
 	AppendMenuW(hMenu, MF_STRING, IDM_FILE_QUIT, L"&Quit");
 
