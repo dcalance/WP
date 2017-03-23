@@ -68,7 +68,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	si.nMax = 20;
 	si.nMin = 0;
 	si.nPage = 1;
-	si.nPos = 10;
+	si.nPos = 0;
 	SetScrollInfo(scrollhwnd, SB_CTL, &si, 1);
 
 	while (GetMessage(&msg, NULL, 0, 0)) {
@@ -85,6 +85,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	LPCSTR a ,b;
 	HBITMAP hBitmap01;
 	int id;
+	HDC wdc;
+	HFONT font;
+	HFONT hFontOld;
 
 	switch (msg) {
 
@@ -117,12 +120,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		
 		GetObject(hBitmap01, sizeof(bitmap), &bitmap);
 		StretchBlt(hdc, 0, 0, rect.right, rect.bottom, hdcMem, 0, 0, bitmap.bmWidth, bitmap.bmHeight, SRCCOPY);
-		//BitBlt(hdc, 0, 0,rect.right, rect.bottom, hdcMem, 0, 0, SRCCOPY);
-
+		
+		
 		SelectObject(hdcMem, oldBitmap);
-		DeleteDC(hdcMem);
-
+		wdc = GetWindowDC(hwnd);
+		GetClientRect(hwnd, &rect);
+		SetTextColor(wdc, RGB(si.nPos * 15, si.nPos * 20, si.nPos * 25));
+		SetBkMode(wdc, TRANSPARENT);
+		rect.left = 20;
+		rect.top = 100;
+		font = CreateFont(50, 0, 0, 0, 300, false, false, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, "Arial");
+		hFontOld = (HFONT)SelectObject(wdc, font);
+		DrawText(wdc, "This text is magic.", -1, &rect, DT_SINGLELINE | DT_NOCLIP);
+		DeleteDC(wdc);
 		EndPaint(hwnd, &ps);
+
 		break;
 	case WM_HOTKEY:
 		switch (wParam)
@@ -187,7 +199,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			si.fMask = SIF_ALL;
 			SetScrollInfo(scrollhwnd, SB_CTL, &si, 1);
-			
+			GetClientRect(hwnd, &rect);
+			InvalidateRect(hwnd, &rect, 1);
 			break;
 
 		}
