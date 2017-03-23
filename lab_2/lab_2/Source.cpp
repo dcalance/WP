@@ -18,6 +18,8 @@ bool currentBackground = true;
 #define ID_SCROLLBAR 400
 
 WNDCLASSW wc;
+HWND scrollhwnd;
+SCROLLINFO si;
 
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -45,7 +47,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		wc.hInstance, 
 		0);
 	
-	CreateWindowEx(
+	scrollhwnd = CreateWindowEx(
 		0,                      // no extended styles 
 		"SCROLLBAR",           // scroll bar control class 
 		(PTSTR)NULL,           // no window text 
@@ -61,6 +63,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		(PVOID)NULL            // pointer not needed 
 	);
 	
+	si.cbSize = sizeof(si);
+	si.fMask = SIF_ALL;
+	si.nMax = 20;
+	si.nMin = 0;
+	si.nPage = 1;
+	si.nPos = 10;
+	SetScrollInfo(scrollhwnd, SB_CTL, &si, 1);
 
 	while (GetMessage(&msg, NULL, 0, 0)) {
 
@@ -75,6 +84,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 	LPCSTR a ,b;
 	HBITMAP hBitmap01;
+	int id;
 
 	switch (msg) {
 
@@ -125,6 +135,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			InvalidateRect(hwnd, NULL, 1);
 			break;
 		}
+		break;
 
 	case WM_CREATE:
 
@@ -132,39 +143,55 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		RegisterHotKey(hwnd, ID_HOTKEY_PAUSE, MOD_CONTROL, 'D');
 		RegisterHotKey(hwnd, ID_HOTKEY_CHANGEBG, MOD_SHIFT, ' ');
 
-
-
 		break;
 	case WM_HSCROLL:
-		switch (LOWORD(wParam))
+		id = GetDlgCtrlID((HWND)lParam);
+		switch (id)
 		{
-			// User clicked the scroll bar shaft left of the scroll box. 
-		case SB_PAGEUP:
+		case ID_SCROLLBAR:
 			
-			break;
-
-			// User clicked the scroll bar shaft right of the scroll box. 
-		case SB_PAGEDOWN:
+			si.cbSize = sizeof(si);
+			si.fMask = SIF_ALL;
+			GetScrollInfo(scrollhwnd, SB_CTL, &si);
 			
-			break;
+			switch (LOWORD(wParam))
+			{
+					// User clicked the left arrow.
+				case SB_LINELEFT:
+					si.nPos -= 1;
+					break;
 
-			// User clicked the left arrow. 
-		case SB_LINEUP:
-			
-			break;
+					// User clicked the right arrow.
+				case SB_LINERIGHT:
+					si.nPos += 1;
+					break;
 
-			// User clicked the right arrow. 
-		case SB_LINEDOWN:
-			
-			break;
+					// User clicked the scroll bar shaft left of the scroll box.
+				case SB_PAGELEFT:
+					si.nPos -= si.nPage;
+					break;
 
-			// User dragged the scroll box. 
-		case SB_THUMBPOSITION:
+					// User clicked the scroll bar shaft right of the scroll box.
+				case SB_PAGERIGHT:
+					si.nPos += si.nPage;
+					break;
+
+					// User dragged the scroll box.
+				case SB_THUMBTRACK:
+					si.nPos = si.nTrackPos;
+					break;
+
+				default:
+					break;
+			}
+
+			si.fMask = SIF_ALL;
+			SetScrollInfo(scrollhwnd, SB_CTL, &si, 1);
 			
 			break;
 
 		}
-		break;
+		return 0;
 	case WM_COMMAND:
 
 		switch (LOWORD(wParam)) {
