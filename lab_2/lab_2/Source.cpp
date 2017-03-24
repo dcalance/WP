@@ -21,13 +21,16 @@ WNDCLASSW wc;
 HWND scrollhwnd;
 SCROLLINFO si;
 
+int clientX = 0;
+int clientY = 0;
+
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	PWSTR lpCmdLine, int nCmdShow) {
 
 	MSG  msg;
 	WNDCLASSW wc = { 0 };
-	wc.lpszClassName = L"Simple menu";
+	wc.lpszClassName = L"Window";
 	wc.hInstance = hInstance;
 	wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
 	wc.lpfnWndProc = WndProc;
@@ -71,6 +74,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	si.nPos = 0;
 	SetScrollInfo(scrollhwnd, SB_CTL, &si, 1);
 
+
 	while (GetMessage(&msg, NULL, 0, 0)) {
 
 		TranslateMessage(&msg);
@@ -88,12 +92,54 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	HDC wdc;
 	HFONT font;
 	HFONT hFontOld;
+	int iVertPos, iHorzPos;
 
 	switch (msg) {
 
 	case WM_SIZE:
+		RECT rect1;
+		int cxClient, cyClient;
+		cxClient = LOWORD(lParam);
+		cyClient = HIWORD(lParam);
+		
+		if (cyClient < 480)
+		{
+			ShowScrollBar(hwnd, SB_VERT, 1);
+		}
+		else
+		{
+			ShowScrollBar(hwnd, SB_VERT, 0);
+		}
+
+		if (cxClient < 640)
+		{
+			ShowScrollBar(hwnd, SB_HORZ, 1);
+		}
+		else
+		{
+			ShowScrollBar(hwnd, SB_HORZ, 0);
+		}
+
+		
+
+		/*si.cbSize = sizeof(si);
+		si.fMask = SIF_ALL;
+		si.nMax = 6400 / (int)cxClient + 1;
+		si.nMin = 0;
+		si.nPage = 1;
+		si.nPos = 0;
+		SetScrollInfo(hwnd, SB_HORZ, &si, 1);
+
+		si.cbSize = sizeof(si);
+		si.fMask = SIF_ALL;
+		si.nMax = 4800 / (int)cyClient + 1;
+		si.nMin = 0;
+		si.nPage = 1;
+		si.nPos = 0;
+		SetScrollInfo(hwnd, SB_VERT, &si, 1);*/
+
 		InvalidateRect(hwnd, NULL, 1);
-		break;
+		return 0;
 	
 	case WM_PAINT:
 		PAINTSTRUCT     ps;
@@ -101,6 +147,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		BITMAP          bitmap;
 		HDC             hdcMem;
 		HGDIOBJ         oldBitmap;
+
+		// Get vertical scroll bar position
+
+		si.cbSize = sizeof(si);
+		si.fMask = SIF_POS;
+		GetScrollInfo(hwnd, SB_VERT, &si);
+		iVertPos = si.nPos;
+
+		// Get horizontal scroll bar position
+
+		GetScrollInfo(hwnd, SB_HORZ, &si);
+		iHorzPos = si.nPos;
+
+
 		if (currentBackground)
 		{
 			hBitmap01 = (HBITMAP)LoadImage(NULL, "background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -124,18 +184,28 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		
 		SelectObject(hdcMem, oldBitmap);
 		wdc = GetWindowDC(hwnd);
-		GetClientRect(hwnd, &rect);
+		GetScrollInfo(scrollhwnd, SB_CTL, &si);
 		SetTextColor(wdc, RGB(si.nPos * 15, si.nPos * 20, si.nPos * 25));
 		SetBkMode(wdc, TRANSPARENT);
-		rect.left = 20;
-		rect.top = 100;
+		
 		font = CreateFont(50, 0, 0, 0, 300, false, false, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, "Arial");
 		hFontOld = (HFONT)SelectObject(wdc, font);
+		GetWindowRect(hwnd, &rect);
+		rect.left = 40;
+		rect.top = 100;
 		DrawText(wdc, "This text is magic.", -1, &rect, DT_SINGLELINE | DT_NOCLIP);
+		
+		DeleteObject(font);
+		DeleteObject(hFontOld);
+		DeleteObject(hdcMem);
+		DeleteObject(oldBitmap);
+		DeleteObject(hBitmap01);
 		DeleteDC(wdc);
+		DeleteDC(hdc);
+		
 		EndPaint(hwnd, &ps);
 
-		break;
+		return 0;
 	case WM_HOTKEY:
 		switch (wParam)
 		{
@@ -154,10 +224,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		AddMenus(hwnd);
 		RegisterHotKey(hwnd, ID_HOTKEY_PAUSE, MOD_CONTROL, 'D');
 		RegisterHotKey(hwnd, ID_HOTKEY_CHANGEBG, MOD_SHIFT, ' ');
+		
 
 		break;
 	case WM_HSCROLL:
 		id = GetDlgCtrlID((HWND)lParam);
+		si.cbSize = sizeof(si);
+		si.fMask = SIF_ALL;
+		GetScrollInfo(hwnd, SB_HORZ, &si);
 		switch (id)
 		{
 		case ID_SCROLLBAR:
@@ -199,12 +273,117 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 			si.fMask = SIF_ALL;
 			SetScrollInfo(scrollhwnd, SB_CTL, &si, 1);
-			GetClientRect(hwnd, &rect);
-			InvalidateRect(hwnd, &rect, 1);
-			break;
+			InvalidateRect(hwnd, NULL, 1);
+			return 0;
+		//default:
+		//	iHorzPos = si.nPos;
+		//	switch (LOWORD(wParam))
+		//	{
 
+		//		// User clicked the left arrow.
+
+		//	case SB_LINELEFT:
+		//		si.nPos -= 1;
+		//		break;
+
+		//		// User clicked the right arrow.
+		//	case SB_LINERIGHT:
+		//		si.nPos += 1;
+		//		break;
+
+		//		// User clicked the scroll bar shaft left of the scroll box.
+		//	case SB_PAGELEFT:
+		//		si.nPos -= si.nPage;
+		//		break;
+
+		//		// User clicked the scroll bar shaft right of the scroll box.
+		//	case SB_PAGERIGHT:
+		//		si.nPos += si.nPage;
+		//		break;
+
+		//		// User dragged the scroll box.
+		//	case SB_THUMBTRACK:
+		//		si.nPos = si.nTrackPos;
+		//		break;
+		//	}
+
+		//	si.fMask = SIF_POS;
+		//	SetScrollInfo(hwnd, SB_HORZ, &si, TRUE);
+		//	GetScrollInfo(hwnd, SB_HORZ, &si);
+
+		//	// If the position has changed, scroll the window 
+
+		//	if (si.nPos != iHorzPos)
+		//	{
+		//		ScrollWindow(hwnd, iHorzPos - si.nPos , 0,
+		//			NULL, NULL);
+		//		UpdateWindow(hwnd);
+		//	}
+		//	return 0;
 		}
+		
 		return 0;
+
+	//case WM_VSCROLL:
+	//	// Get all the vertical scroll bar information
+
+	//	si.cbSize = sizeof(si);
+	//	si.fMask = SIF_ALL;
+	//	GetScrollInfo(hwnd, SB_VERT, &si);
+
+	//	// Save the position for comparison later on
+	//	iVertPos = si.nPos;
+
+	//	switch (LOWORD(wParam))
+	//	{
+	//	case SB_TOP:
+	//		si.nPos = si.nMin;
+	//		break;
+
+	//	case SB_BOTTOM:
+	//		si.nPos = si.nMax;
+	//		break;
+
+	//	case SB_LINEUP:
+	//		si.nPos -= 1;
+	//		break;
+
+	//	case SB_LINEDOWN:
+	//		si.nPos += 1;
+	//		break;
+
+	//	case SB_PAGEUP:
+	//		si.nPos -= si.nPage;
+	//		break;
+
+	//	case SB_PAGEDOWN:
+	//		si.nPos += si.nPage;
+	//		break;
+
+	//	case SB_THUMBTRACK:
+	//		si.nPos = si.nTrackPos;
+	//		break;
+
+	//	default:
+	//		break;
+	//	}
+	//	// Set the position and then retrieve it.  Due to adjustments
+	//	//   by Windows it may not be the same as the value set.
+
+	//	si.fMask = SIF_POS;
+	//	SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
+	//	GetScrollInfo(hwnd, SB_VERT, &si);
+
+	//	// If the position has changed, scroll the window and update it
+
+	//	if (si.nPos != iVertPos)
+	//	{
+	//		ScrollWindow(hwnd, 0,iVertPos - si.nPos,
+	//			NULL, NULL);
+	//		UpdateWindow(hwnd);
+	//	}
+	//	return 0;
+
 	case WM_COMMAND:
 
 		switch (LOWORD(wParam)) {
