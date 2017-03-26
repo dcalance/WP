@@ -45,7 +45,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	wc.hInstance = hInstance;
 	wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
 	wc.lpfnWndProc = WndProc;
-	wc.hCursor = LoadCursor(0, IDC_ARROW);
+	wc.hCursor = LoadCursor(0, IDC_HAND);
 	wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 
 	RegisterClassW(&wc);
@@ -159,21 +159,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		
 
-		/*si.cbSize = sizeof(si);
-		si.fMask = SIF_ALL;
-		si.nMax = 6400 / (int)cxClient + 1;
-		si.nMin = 0;
-		si.nPage = 1;
-		si.nPos = 0;
-		SetScrollInfo(hwnd, SB_HORZ, &si, 1);
-
-		si.cbSize = sizeof(si);
-		si.fMask = SIF_ALL;
-		si.nMax = 4800 / (int)cyClient + 1;
-		si.nMin = 0;
-		si.nPage = 1;
-		si.nPos = 0;
-		SetScrollInfo(hwnd, SB_VERT, &si, 1);*/
 		GetClientRect(hwnd, &rect);
 		InvalidateRect(hwnd, NULL, 1);
 		return 0;
@@ -184,18 +169,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		BITMAP          bitmap;
 		HDC             hdcMem;
 		HGDIOBJ         oldBitmap;
-
-		// Get vertical scroll bar position
-
-		si.cbSize = sizeof(si);
-		si.fMask = SIF_POS;
-		GetScrollInfo(hwnd, SB_VERT, &si);
-		iVertPos = si.nPos;
-
-		// Get horizontal scroll bar position
-
-		GetScrollInfo(hwnd, SB_HORZ, &si);
-		iHorzPos = si.nPos;
 
 
 		if (currentBackground)
@@ -311,114 +284,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			SetScrollInfo(scrollhwnd, SB_CTL, &si, 1);
 			InvalidateRect(hwnd, NULL, 1);
 			return 0;
-		//default:
-		//	iHorzPos = si.nPos;
-		//	switch (LOWORD(wParam))
-		//	{
-
-		//		// User clicked the left arrow.
-
-		//	case SB_LINELEFT:
-		//		si.nPos -= 1;
-		//		break;
-
-		//		// User clicked the right arrow.
-		//	case SB_LINERIGHT:
-		//		si.nPos += 1;
-		//		break;
-
-		//		// User clicked the scroll bar shaft left of the scroll box.
-		//	case SB_PAGELEFT:
-		//		si.nPos -= si.nPage;
-		//		break;
-
-		//		// User clicked the scroll bar shaft right of the scroll box.
-		//	case SB_PAGERIGHT:
-		//		si.nPos += si.nPage;
-		//		break;
-
-		//		// User dragged the scroll box.
-		//	case SB_THUMBTRACK:
-		//		si.nPos = si.nTrackPos;
-		//		break;
-		//	}
-
-		//	si.fMask = SIF_POS;
-		//	SetScrollInfo(hwnd, SB_HORZ, &si, TRUE);
-		//	GetScrollInfo(hwnd, SB_HORZ, &si);
-
-		//	// If the position has changed, scroll the window 
-
-		//	if (si.nPos != iHorzPos)
-		//	{
-		//		ScrollWindow(hwnd, iHorzPos - si.nPos , 0,
-		//			NULL, NULL);
-		//		UpdateWindow(hwnd);
-		//	}
-		//	return 0;
 		}
 		
 		return 0;
-
-	//case WM_VSCROLL:
-	//	// Get all the vertical scroll bar information
-
-	//	si.cbSize = sizeof(si);
-	//	si.fMask = SIF_ALL;
-	//	GetScrollInfo(hwnd, SB_VERT, &si);
-
-	//	// Save the position for comparison later on
-	//	iVertPos = si.nPos;
-
-	//	switch (LOWORD(wParam))
-	//	{
-	//	case SB_TOP:
-	//		si.nPos = si.nMin;
-	//		break;
-
-	//	case SB_BOTTOM:
-	//		si.nPos = si.nMax;
-	//		break;
-
-	//	case SB_LINEUP:
-	//		si.nPos -= 1;
-	//		break;
-
-	//	case SB_LINEDOWN:
-	//		si.nPos += 1;
-	//		break;
-
-	//	case SB_PAGEUP:
-	//		si.nPos -= si.nPage;
-	//		break;
-
-	//	case SB_PAGEDOWN:
-	//		si.nPos += si.nPage;
-	//		break;
-
-	//	case SB_THUMBTRACK:
-	//		si.nPos = si.nTrackPos;
-	//		break;
-
-	//	default:
-	//		break;
-	//	}
-	//	// Set the position and then retrieve it.  Due to adjustments
-	//	//   by Windows it may not be the same as the value set.
-
-	//	si.fMask = SIF_POS;
-	//	SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
-	//	GetScrollInfo(hwnd, SB_VERT, &si);
-
-	//	// If the position has changed, scroll the window and update it
-
-	//	if (si.nPos != iVertPos)
-	//	{
-	//		ScrollWindow(hwnd, 0,iVertPos - si.nPos,
-	//			NULL, NULL);
-	//		UpdateWindow(hwnd);
-	//	}
-	//	return 0;
+	break;
 
 	case WM_COMMAND:
 
