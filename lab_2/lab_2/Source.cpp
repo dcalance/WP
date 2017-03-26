@@ -2,10 +2,15 @@
 #include <mmdeviceapi.h>
 #include <endpointvolume.h>
 #include "resource4.h"
+#include <crtdbg.h> 
+#include <tchar.h>
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 bool ChangeVolume(double nVolume, bool bScalar);
-void AddMenus(HWND);
+void AddMenus(HWND); 
+static void initListBox(HWND hwndDlg);
+static TCHAR* OnButtonClickGetSelection(HWND hwndDlg);
+
 
 bool currentBackground = true;
 
@@ -18,11 +23,13 @@ bool currentBackground = true;
 
 #define ID_SCROLLBAR 400
 #define ID_LISTBOX 401
+#define ID_BUTTON_LISTBOX 402
 
 WNDCLASSW wc;
 HWND scrollhwnd;
 HWND hwndList;
 SCROLLINFO si;
+TCHAR* paintStr = new TCHAR[30];
 
 int clientX = 0;
 int clientY = 0;
@@ -70,21 +77,29 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		hInstance,      // instance owning this window 
 		(PVOID)NULL            // pointer not needed 
 	);
+	
+	hwndList = CreateWindowExW(WS_EX_CLIENTEDGE
+		, L"LISTBOX", NULL
+		, WS_CHILD | WS_VISIBLE | ES_AUTOVSCROLL
+		, 10, 120, 300, 200
+		, hwnd, (HMENU)ID_LISTBOX, hInstance, NULL);
+	initListBox(hwndList);
 
-	hwndList = scrollhwnd = CreateWindowEx(
-		0,                      // no extended styles 
-		"LISTBOX",           // scroll bar control class 
-		(PTSTR)NULL,           // no window text 
-		WS_CHILD | WS_VISIBLE ,
-		0,              // horizontal position 
-		120,				// vertical position 
-		50,             // width of the scroll bar 
-		20,               // height of the scroll bar
-		hwnd,             // handle to main window 
-		(HMENU)ID_LISTBOX,           // no menu 
-		hInstance,      // instance owning this window 
-		(PVOID)NULL            // pointer not needed 
-	);
+	HWND hwndButton = CreateWindow(
+		"BUTTON",  // Predefined class; Unicode assumed 
+		"Change",      // Button text 
+		WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
+		320,         // x position 
+		120,         // y position 
+		100,        // Button width
+		40,        // Button height
+		hwnd,     // Parent window
+		(HMENU)ID_BUTTON_LISTBOX,       // No menu.
+		(HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+		NULL);      // Pointer not needed.
+
+	
+	
 
 	
 	si.cbSize = sizeof(si);
@@ -215,7 +230,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		GetWindowRect(hwnd, &rect);
 		rect.left = 40;
 		rect.top = 100;
-		DrawText(wdc, "This text is magic.", -1, &rect, DT_SINGLELINE | DT_NOCLIP);
+		DrawText(wdc, paintStr, -1, &rect, DT_SINGLELINE | DT_NOCLIP);
 		
 		DeleteObject(font);
 		DeleteObject(hFontOld);
@@ -242,13 +257,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_CREATE:
-
+		paintStr = "This text is magic.";
 		AddMenus(hwnd);
 		RegisterHotKey(hwnd, ID_HOTKEY_PAUSE, MOD_CONTROL, 'D');
 		RegisterHotKey(hwnd, ID_HOTKEY_CHANGEBG, MOD_SHIFT, ' ');
-		
-		SendMessage(hwndList, LB_ADDSTRING, 0, (LPARAM)"some constant text");
-		SetFocus(hwndList);
+
 		break;
 	case WM_HSCROLL:
 		id = GetDlgCtrlID((HWND)lParam);
@@ -411,6 +424,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 		switch (LOWORD(wParam)) {
 
+		case ID_BUTTON_LISTBOX:
+			/*if (paintStr != NULL)
+			{
+				delete [] paintStr;
+				paintStr = NULL;
+			}*/
+			paintStr = OnButtonClickGetSelection(hwnd);
+			InvalidateRect(hwnd, NULL, 1);
+			break;
+
 		case IDM_FILE_ABOUT:
 			MessageBox(
 				NULL,
@@ -516,4 +539,53 @@ bool ChangeVolume(double nVolume, bool bScalar)
 	CoUninitialize();
 
 	return FALSE;
+}
+
+static void initListBox(HWND hwndDlg)
+{
+	// Strings to be added to the listbox
+	LPCTSTR strings[] = {
+		_T("This text is magic."),
+		_T("I like turtles."),
+		_T("I like apples."),
+		_T("Sausage."),
+		NULL
+	};
+
+	// Add strings to the listbox
+	LPCTSTR * pCurrString = strings;
+	while (*pCurrString != NULL)
+	{
+		SendMessage(hwndDlg, LB_ADDSTRING, 0, (LPARAM)*pCurrString);
+
+		// Move to next string
+		++pCurrString;
+	}
+}
+
+static TCHAR* OnButtonClickGetSelection(HWND hwndDlg)
+{
+	// Get handle of listbox
+	HWND hwndList1 = GetDlgItem(hwndDlg, ID_LISTBOX);
+	_ASSERTE(hwndList1 != NULL);
+
+	// Get current selection index in listbox
+	int itemIndex = (int)SendMessage(hwndList1, LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+	if (itemIndex == LB_ERR)
+	{
+		TCHAR * default = new TCHAR[10];
+		default = "Error.";
+		return default;
+	}
+
+	// Get length of text in listbox
+	int textLen = (int)SendMessage(hwndList1, LB_GETTEXTLEN, (WPARAM)itemIndex, 0);
+
+	// Allocate buffer to store text (consider +1 for end of string)
+	TCHAR * textBuffer = new TCHAR[textLen + 1];
+
+	// Get actual text in buffer
+	SendMessage(hwndList1, LB_GETTEXT, (WPARAM)itemIndex, (LPARAM)textBuffer);
+
+	return textBuffer;
 }
