@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <mmdeviceapi.h>
 #include <endpointvolume.h>
+#include "resource4.h"
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 bool ChangeVolume(double nVolume, bool bScalar);
@@ -16,9 +17,11 @@ bool currentBackground = true;
 #define ID_HOTKEY_CHANGEBG 101
 
 #define ID_SCROLLBAR 400
+#define ID_LISTBOX 401
 
 WNDCLASSW wc;
 HWND scrollhwnd;
+HWND hwndList;
 SCROLLINFO si;
 
 int clientX = 0;
@@ -28,6 +31,7 @@ int clientY = 0;
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	PWSTR lpCmdLine, int nCmdShow) {
 
+
 	MSG  msg;
 	WNDCLASSW wc = { 0 };
 	wc.lpszClassName = L"Window";
@@ -35,12 +39,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
 	wc.lpfnWndProc = WndProc;
 	wc.hCursor = LoadCursor(0, IDC_ARROW);
+	wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 
 	RegisterClassW(&wc);
 	HWND hwnd = CreateWindowW(
 		wc.lpszClassName, 
 		L"Window",
-		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+		WS_OVERLAPPEDWINDOW | WS_VISIBLE | ES_AUTOVSCROLL | ES_AUTOHSCROLL,
 		100, 
 		100, 
 		640, 
@@ -65,6 +70,22 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		hInstance,      // instance owning this window 
 		(PVOID)NULL            // pointer not needed 
 	);
+
+	hwndList = scrollhwnd = CreateWindowEx(
+		0,                      // no extended styles 
+		"LISTBOX",           // scroll bar control class 
+		(PTSTR)NULL,           // no window text 
+		WS_CHILD | WS_VISIBLE ,
+		0,              // horizontal position 
+		120,				// vertical position 
+		50,             // width of the scroll bar 
+		20,               // height of the scroll bar
+		hwnd,             // handle to main window 
+		(HMENU)ID_LISTBOX,           // no menu 
+		hInstance,      // instance owning this window 
+		(PVOID)NULL            // pointer not needed 
+	);
+
 	
 	si.cbSize = sizeof(si);
 	si.fMask = SIF_ALL;
@@ -93,6 +114,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	HFONT font;
 	HFONT hFontOld;
 	int iVertPos, iHorzPos;
+	RECT rect;
 
 	switch (msg) {
 
@@ -137,7 +159,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		si.nPage = 1;
 		si.nPos = 0;
 		SetScrollInfo(hwnd, SB_VERT, &si, 1);*/
-
+		GetClientRect(hwnd, &rect);
 		InvalidateRect(hwnd, NULL, 1);
 		return 0;
 	
@@ -225,7 +247,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		RegisterHotKey(hwnd, ID_HOTKEY_PAUSE, MOD_CONTROL, 'D');
 		RegisterHotKey(hwnd, ID_HOTKEY_CHANGEBG, MOD_SHIFT, ' ');
 		
-
+		SendMessage(hwndList, LB_ADDSTRING, 0, (LPARAM)"some constant text");
+		SetFocus(hwndList);
 		break;
 	case WM_HSCROLL:
 		id = GetDlgCtrlID((HWND)lParam);
