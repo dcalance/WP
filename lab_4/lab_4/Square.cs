@@ -30,28 +30,69 @@ namespace lab_4
         }
         public override void Motorics(Rect border, Rect shape = new Rect())
         {
-            if (!upDown && rect.Bottom > border.Bottom || !upDown && rect.Bottom > shape.Bottom)
+            bool borderUpCol = upDown && rect.Top < border.Top;
+            bool borderDownCol = !upDown && rect.Bottom > border.Bottom;
+            bool borderLeftCol = leftRight && rect.Left < border.Left;
+            bool borderRightCol = !leftRight && rect.Right > border.Right;
+
+            if (shape.Width == 0 || shape.Height == 0)
             {
-                upDown = true;
+                if (borderDownCol)
+                {
+                    upDown = true;
+                }
+                if (borderUpCol)
+                {
+                    upDown = false;
+                }
+                if (borderLeftCol)
+                {
+                    leftRight = false;
+                }
+                if (borderRightCol)
+                {
+                    leftRight = true;
+                }
             }
-            if (upDown && rect.Top < border.Top || upDown && rect.Top < shape.Top)
+            else
             {
-                upDown = false;
+                bool checkXAxis =
+                    (rect.Right < shape.Right && rect.Right > shape.Left) ||
+                    (rect.Left < shape.Right && rect.Left > shape.Left);
+
+                bool checkYAxis =
+                    (rect.Bottom > shape.Top && rect.Bottom < shape.Bottom) ||
+                    (rect.Top > shape.Top && rect.Top < shape.Bottom);
+                bool ballColCheck = checkXAxis && checkYAxis;
+                if (borderDownCol || !upDown && ballColCheck)
+                {
+                    upDown = true;
+                }
+                else
+                if (borderUpCol || upDown && ballColCheck)
+                {
+                    upDown = false;
+                }
+                else
+                if (borderLeftCol || leftRight && ballColCheck)
+                {
+                    leftRight = false;
+                }
+                else
+                if (borderRightCol || !leftRight && ballColCheck)
+                {
+                    leftRight = true;
+                }
             }
-            if (leftRight && rect.Left < border.Left || leftRight && rect.Left < shape.Left)
-            {
-                leftRight = false;
-            }
-            if (!leftRight && rect.Right > border.Right || !leftRight && rect.Right > shape.Right)
-            {
-                leftRight = true;
-            }
-            rect.X = (leftRight) ? rect.X - velocityX : rect.X + velocityX;
-            rect.Y = (upDown) ? rect.Y - velocityY : rect.Y + velocityY;
         }
         public override Rect getHitBox()
         {
             return rect;
+        }
+        public override void Update()
+        {
+            rect.X = (leftRight) ? rect.X - velocityX : rect.X + velocityX;
+            rect.Y = (upDown) ? rect.Y - velocityY : rect.Y + velocityY;
         }
         public override Shape Draw()
         {

@@ -66,14 +66,18 @@ namespace lab_4
                     }
                 }
                 shapes.Add(shape);
-                animationCanvas.Children.Add(shape.Draw());
+            }
+            foreach (var item in shapes)
+            {
+                item.Update();
+                animationCanvas.Children.Add(item.Draw());
             }
         }
         private void animationCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             Circle circle = new Circle(e.GetPosition(animationCanvas), 20);
-            Square square = new Square(e.GetPosition(animationCanvas), 20);
-            shapes.Add(circle);
+            Square square = new Square(e.GetPosition(animationCanvas), 30);
+            shapes.Add(square);
             //animationCanvas.Children.Add(circle.Draw());
         }
     }

@@ -17,5 +17,6 @@ namespace lab_4
         public abstract Shape Draw();
         public abstract void Motorics(Rect border, Rect shape = new Rect());
         public abstract Rect getHitBox();
+        public abstract void Update();
     }
 }

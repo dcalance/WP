@@ -26,6 +26,11 @@ namespace lab_4
             upDown = inputUpDown;
             leftRight = inputLeftRight;
         }
+        public override void Update()
+        {
+            center.X = (leftRight) ? center.X - velocityX : center.X + velocityX;
+            center.Y = (upDown) ? center.Y - velocityY : center.Y + velocityY;
+        }
         public override void Motorics(Rect border, Rect shape = new Rect())
         {
             bool borderDownCol = !upDown && center.Y + radius > border.Bottom;
@@ -56,38 +61,33 @@ namespace lab_4
             {
                 bool checkXAxis = 
                     (center.X + radius < shape.Right && center.X + radius > shape.Left) ||
-                    (center.X - radius < shape.Right && center.X - radius > shape.Left);
+                    (center.X - radius < shape.Right && center.Y - radius > shape.Left);
 
                 bool checkYAxis = 
                     (center.Y + radius > shape.Top && center.Y + radius < shape.Bottom) ||
                     (center.Y - radius > shape.Top && center.Y - radius < shape.Bottom);
                 bool ballColCheck = checkXAxis && checkYAxis;
 
-                //if (borderDownCol || !upDown && (center.Y + radius > shape.Top && center.Y + radius < shape.Bottom && checkXAxis))
-                if (borderDownCol || ballColCheck)
+                if (borderDownCol || !upDown && ballColCheck)
                 {
                     upDown = true;
                 }
                 else
-                //if (borderUpCol || upDown && (center.Y - radius < shape.Bottom && checkXAxis))
-                if (borderUpCol || ballColCheck)
+                if (borderUpCol || upDown && ballColCheck)
                 {
                     upDown = false;
                 }
                 else
-                //if (borderLeftCol) //|| center.X - radius < shape.Right && checkYAxis
-                if(borderLeftCol || ballColCheck)
+                if(borderLeftCol || leftRight && ballColCheck)
                 {
                     leftRight = false;
                 }
                 else
-                if (borderRightCol || ballColCheck) //|| center.X + radius > shape.Left && checkYAxis
+                if (borderRightCol || !leftRight && ballColCheck)
                 {
                     leftRight = true;
                 }
             }
-            center.X = (leftRight) ? center.X - velocityX : center.X + velocityX;
-            center.Y = (upDown) ? center.Y - velocityY : center.Y + velocityY;
         }
         public override Rect getHitBox()
         {
