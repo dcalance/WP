@@ -27,34 +27,17 @@ namespace lab_4
             rect.Y = inputCenter.Y;
             rect.Width = inputSize;
             rect.Height = inputSize;
+            isCircle = false;
         }
-        public override void Motorics(Rect border, Rect shape = new Rect())
+        public override int Motorics(Rect border, Rect shape = new Rect(), bool inputIsCircle = false)
         {
             bool borderUpCol = upDown && rect.Top < border.Top;
             bool borderDownCol = !upDown && rect.Bottom > border.Bottom;
             bool borderLeftCol = leftRight && rect.Left < border.Left;
             bool borderRightCol = !leftRight && rect.Right > border.Right;
+            int finalVal = 0;
 
-            if (shape.Width == 0 || shape.Height == 0)
-            {
-                if (borderDownCol)
-                {
-                    upDown = true;
-                }
-                if (borderUpCol)
-                {
-                    upDown = false;
-                }
-                if (borderLeftCol)
-                {
-                    leftRight = false;
-                }
-                if (borderRightCol)
-                {
-                    leftRight = true;
-                }
-            }
-            else
+            if (shape.Width != 0 || shape.Height != 0)
             {
                 bool checkXAxis =
                     (rect.Right < shape.Right && rect.Right > shape.Left) ||
@@ -64,26 +47,64 @@ namespace lab_4
                     (rect.Bottom > shape.Top && rect.Bottom < shape.Bottom) ||
                     (rect.Top > shape.Top && rect.Top < shape.Bottom);
                 bool ballColCheck = checkXAxis && checkYAxis;
-                if (borderDownCol || !upDown && ballColCheck)
-                {
-                    upDown = true;
-                }
-                else
-                if (borderUpCol || upDown && ballColCheck)
+                if (upDown && ballColCheck)
                 {
                     upDown = false;
+                    if (isCircle == inputIsCircle)
+                    {
+                        finalVal = 2;
+                    }
                 }
                 else
-                if (borderLeftCol || leftRight && ballColCheck)
+                if (!upDown && ballColCheck)
+                {
+                    upDown = true;
+                    if (isCircle == inputIsCircle)
+                    {
+                        finalVal = 2;
+                    }
+                }
+                else
+                if (leftRight && ballColCheck)
                 {
                     leftRight = false;
+                    if (isCircle == inputIsCircle)
+                    {
+                        finalVal = 2;
+                    }
                 }
                 else
-                if (borderRightCol || !leftRight && ballColCheck)
+                if (!leftRight && ballColCheck)
                 {
                     leftRight = true;
+                    if (isCircle == inputIsCircle)
+                    {
+                        finalVal = 2;
+                    }
                 }
             }
+            if (borderDownCol)
+            {
+                upDown = true;
+                velocityX = (velocityX >= 10) ? 10 : velocityX + 1;
+                velocityY = (velocityY >= 10) ? 10 : velocityY + 1;
+            }
+            if (borderUpCol)
+            {
+                upDown = false;
+                velocityX = (velocityX >= 10) ? 10 : velocityX + 1;
+                velocityY = (velocityY >= 10) ? 10 : velocityY + 1;
+            }
+            if (borderLeftCol)
+            {
+                leftRight = false;
+            }
+            if (borderRightCol)
+            {
+                leftRight = true;
+            }
+            
+            return finalVal;
         }
         public override Rect getHitBox()
         {

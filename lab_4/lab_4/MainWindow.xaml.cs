@@ -21,7 +21,7 @@ namespace lab_4
         DispatcherTimer dispatcherTimer = new DispatcherTimer();
         List<Shapes> shapes = new List<Shapes>();
         Rect border = new Rect();
-        bool debugHitbox = false;
+        bool debugHitbox = true;
         public MainWindow()
         {
             InitializeComponent();
@@ -34,7 +34,8 @@ namespace lab_4
         }
         private void animationLoop(object sender, EventArgs e)
         {
-            
+            int res = 0;
+            List<Shapes> newShapes = new List<Shapes>();
             while (animationCanvas.Children.Count > 0)
             {
                 animationCanvas.Children.RemoveAt(0);
@@ -45,13 +46,20 @@ namespace lab_4
                 shapes.RemoveAt(0);
                 if (shapes.Count == 0)
                 {
-                    shape.Motorics(border);
+                    res = shape.Motorics(border);
+                    switch (res)
+                    {
+                        case 1:
+                            Point center = new Point() { X = shape.getHitBox().X, Y = shape.getHitBox().Y };
+                            shape = new Square(center, 40);
+                            break;
+                    }
                 }
                 else
                 {
                     foreach (var item in shapes)
                     {
-                        shape.Motorics(border, item.getHitBox());
+                        res = shape.Motorics(border, item.getHitBox(), item.isCircle);
                         if (debugHitbox)
                         {
                             Rect rect = item.getHitBox();
@@ -63,9 +71,25 @@ namespace lab_4
                             Canvas.SetTop(drawRect, rect.Y - rect.Height / 2);
                             animationCanvas.Children.Add(drawRect);
                         }
+                        Point center = new Point() { X = shape.getHitBox().X, Y = shape.getHitBox().Y };
+                        switch (res)
+                        {
+                            case 1:
+                                shape = new Square(center, 40);
+                                break;
+                            case 2:
+                                center = new Point() { X = shape.getHitBox().X - 40, Y = shape.getHitBox().Y };
+                                Point center2 = new Point() { X = 0, Y = 0 };
+                                shape = new Square(center, 20);
+                                Shapes shape2 = new Square(center2, 20);
+                                newShapes.Add(shape2);
+                                break;
+                        }
                     }
                 }
                 shapes.Add(shape);
+                shapes.AddRange(newShapes);
+                newShapes = new List<Shapes>();
             }
             foreach (var item in shapes)
             {
@@ -77,7 +101,7 @@ namespace lab_4
         {
             Circle circle = new Circle(e.GetPosition(animationCanvas), 20);
             Square square = new Square(e.GetPosition(animationCanvas), 30);
-            shapes.Add(square);
+            shapes.Add(circle);
             //animationCanvas.Children.Add(circle.Draw());
         }
     }
