@@ -21,7 +21,7 @@ namespace lab_4
         DispatcherTimer dispatcherTimer = new DispatcherTimer();
         List<Shapes> shapes = new List<Shapes>();
         Rect border = new Rect();
-        bool debugHitbox = true;
+        bool debugHitbox = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -78,11 +78,14 @@ namespace lab_4
                                 shape = new Square(center, 40);
                                 break;
                             case 2:
-                                center = new Point() { X = shape.getHitBox().X - 40, Y = shape.getHitBox().Y };
-                                Point center2 = new Point() { X = 0, Y = 0 };
-                                shape = new Square(center, 20);
-                                Shapes shape2 = new Square(center2, 20);
-                                newShapes.Add(shape2);
+                                if (shapes.Count < 20)
+                                {
+                                    center = new Point() { X = shape.getHitBox().X - 40, Y = shape.getHitBox().Y };
+                                    Point center2 = new Point() { X = 0, Y = 0 };
+                                    shape = new Square(center, 20);
+                                    Shapes shape2 = new Square(center2, 20);
+                                    newShapes.Add(shape2);
+                                }
                                 break;
                         }
                     }
